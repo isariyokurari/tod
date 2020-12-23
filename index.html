@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+ <META http-equiv="Content-Type" content="text/html; charset=shift_jis">
+ <TITLE>60 Laps Stopwatch</TITLE>
+</HEAD>
+<BODY>
+60 Laps Stopwatch
+<FORM name="stopwatch">
+ <INPUT name="display" type="text">
+ <INPUT name="button" type="button" value="Start" onClick="buttonFunc()">
+ <BR>
+ <TEXTAREA name="csv" cols="24" rows="62"></TEXTAREA>
+</FORM>
+Copyright (C) 2020 Isariyokurari All Rights Reserved
+<SCRIPT type="text/javascript">
+const lap_max = 60;
+const csv_header = "Floor,lap,total\n";
+resetForm();
+
+function resetForm() {
+  timer_start = Date.now();
+  timer_lap = timer_start;
+  lap_index = 0;
+  document.stopwatch.display.value = formatTime(0);
+  document.stopwatch.csv.value = csv_header;
+}
+
+function buttonFunc() {
+  if(lap_index == 0){
+    resetForm();
+    document.stopwatch.button.value = "Lap";
+    lap_index = 1;
+    timerID = setInterval("updateDisplay()",16);
+  }else{
+    lapFunc();
+    lap_index++;
+    if(lap_index > lap_max){
+      lap_index = 0;
+      clearInterval(timerID);
+      document.stopwatch.display.value = formatTime((timer_now - timer_start)/10);
+      document.stopwatch.button.value = "ReStart";
+    }
+  }
+}
+
+function updateDisplay() {
+  document.stopwatch.display.value = formatTime((Date.now() - timer_start)/10);
+}
+
+function lapFunc() {
+  const inputString = document.stopwatch.csv.value;
+  const firstRowEndPos = inputString.indexOf('\n', 0);
+  const outputString = inputString.substr(firstRowEndPos + 1);
+  timer_now = Date.now();
+  document.stopwatch.csv.value =
+    csv_header +
+    lap_index + "," +
+    formatTime((timer_now - timer_lap)/10) + "," +
+    formatTime((timer_now - timer_start)/10) + "\n" +
+    outputString;
+  timer_lap = timer_now;
+}
+
+function formatTime(num) {
+  var s = num / 100;
+  var m = Math.floor(s / 60);
+  var h = Math.floor(m / 60);
+  s = (s % 60).toFixed(2);
+  m = m % 60; 
+  if(s < 10) s = "0" + s;
+  if(m < 10) m = "0" + m;
+  if(h < 10) h = "0" + h;
+  return h + ":" + m + ":" + s;
+}
+</SCRIPT> 
+
+</BODY>
+</HTML>
