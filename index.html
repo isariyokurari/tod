@@ -49,16 +49,13 @@ function updateDisplay() {
 }
 
 function lapFunc() {
-  const inputString = document.stopwatch.csv.value;
-  const firstRowEndPos = inputString.indexOf('\n', 0);
-  const outputString = inputString.substr(firstRowEndPos + 1);
   timer_now = Date.now();
   document.stopwatch.csv.value =
     csv_header +
     lap_index + "," +
     formatTime((timer_now - timer_lap)/10) + "," +
     formatTime((timer_now - timer_start)/10) + "\n" +
-    outputString;
+    document.stopwatch.csv.value.slice(csv_header.length);
   timer_lap = timer_now;
 }
 
