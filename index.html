@@ -27,20 +27,29 @@ function resetForm() {
 }
 
 function buttonFunc() {
-  if(lap_index == 0){
-    resetForm();
-    document.stopwatch.button.value = "Lap";
-    lap_index = 1;
-    timerID = setInterval("updateDisplay()",16);
-  }else{
-    lapFunc();
-    lap_index++;
-    if(lap_index > lap_max){
+  switch(lap_index){
+    case 0:
+      resetForm();
+      document.stopwatch.button.value = "Lap";
+      lap_index++;
+      timerID = setInterval("updateDisplay()",64);
+      break;
+    case lap_max + 1:
+      textarea = document.getElementsByTagName("TEXTAREA")[0];
+      textarea.select();
+      document.execCommand("copy");
+      document.stopwatch.button.value = "Start";
       lap_index = 0;
-      clearInterval(timerID);
-      document.stopwatch.display.value = formatTime((timer_now - timer_start)/10);
-      document.stopwatch.button.value = "ReStart";
-    }
+      break;
+    default:
+      lapFunc();
+      if(lap_index == lap_max){
+        clearInterval(timerID);
+        document.stopwatch.button.value = "Copy to Clipboard";
+        document.stopwatch.display.value = formatTime((timer_now - timer_start)/10);
+      }
+      lap_index++;
+      break;
   }
 }
 
