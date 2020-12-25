@@ -4,12 +4,36 @@
   <META http-equiv="Content-Type" content="text/html; charset=shift_jis">
   <TITLE>60 Laps Stopwatch</TITLE>
  </HEAD>
+ <SCRIPT type="text/javascript">
+  var t = 0;
+  const ignore_tap_ms = 1000
+  document.documentElement.addEventListener(
+    'touchend',
+    function(e){
+      var now = new Date().getTime();
+      if ((now - t) < ignore_tap_ms){
+        e.preventDefault();
+      }
+      t = now;
+    }, false
+  );
+  document.documentElement.addEventListener(
+    'touchstart',
+    function(e){
+      if(e.touches.length >= 2){
+        e.preventDefault();
+      }
+    }, {passive: false}
+  );
+ </SCRIPT>
  <BODY>
-  <FORM name="stopwatch">
-   <INPUT name="display" type="text"><BR>
-   <INPUT name="button" type="button" value="Start" onClick="buttonFunc()"><BR>
-   <TEXTAREA name="csv" cols="24" rows="62"></TEXTAREA>
-  </FORM>
+  <SPAN style="zoom: 600%">
+   <FORM name="stopwatch">
+    <INPUT name="display" type="text"><BR>
+    <INPUT name="button" type="button" value="Start" onClick="buttonFunc()"><BR>
+    <TEXTAREA name="csv" cols="24" rows="62"></TEXTAREA>
+   </FORM>
+  </SPAN>
  </BODY>
  <SCRIPT type="text/javascript">
   const lap_max = 60;
