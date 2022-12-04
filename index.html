@@ -1,0 +1,136 @@
+<!DOCTYPE HTML>
+<HTML>
+ <HEAD>
+  <META http-equiv="Content-Type" content="text/html; charset=shift_jis">
+  <TITLE>60 Laps Stopwatch</TITLE>
+ </HEAD>
+ <SCRIPT type="text/javascript">
+  var t = 0;
+  const ignore_tap_ms = 1000
+  const clipboard_buff = 4096
+  document.documentElement.addEventListener(
+    'touchend',
+    function(e){
+      var now = new Date().getTime();
+      if ((now - t) < ignore_tap_ms){
+        e.preventDefault();
+      }
+      t = now;
+    }, false
+  );
+  document.documentElement.addEventListener(
+    'touchstart',
+    function(e){
+      if(e.touches.length >= 2){
+        e.preventDefault();
+      }
+    }, {passive: false}
+  );
+ </SCRIPT>
+ <BODY>
+  <SPAN style="zoom: 600%">
+   <FORM name="stopwatch">
+    <INPUT name="display" type="text"><BR>
+    <INPUT name="button" type="button" value="Start" onClick="buttonFunc()"><BR>
+    <TEXTAREA name="csv" cols="24" rows="62"></TEXTAREA>
+   </FORM>
+  </SPAN>
+ </BODY>
+ <SCRIPT type="text/javascript">
+  const lap_max = 60;
+  const csv_header = "floor,lap,total\n";
+  const ua = window.navigator.userAgent.toLowerCase();
+  const is_ios = ((ua.indexOf("iphone") !== -1) | (ua.indexOf("ipad") !== -1)) ? true : false;
+  const safari_iphone = ((ua.indexOf("iphone") !== -1) & (ua.indexOf("safari") !== -1)) ? true : false;
+  if(!safari_iphone){
+    alert("Cautinon: This page was confirmed operation only with Safari on iOS 12.4.1 by iPhone6S.");
+  }
+  resetForm();
+
+  function resetForm(){
+    timer_start = Date.now();
+    timer_lap = timer_start;
+    lap_index = 0;
+    document.stopwatch.display.value = formatTime(0);
+    document.stopwatch.csv.value = csv_header;
+  }
+
+  function buttonFunc(){
+    switch(lap_index){
+      case 0:
+        resetForm();
+        document.stopwatch.button.value = "Lap";
+        lap_index++;
+        timerID = setInterval("updateDisplay()",64);
+        break;
+      case lap_max + 1:
+        copyToClipboard(document.stopwatch.csv);
+        document.stopwatch.button.value = "Start";
+        lap_index = 0;
+        break;
+      default:
+        lapFunc();
+        if(lap_index == lap_max){
+          clearInterval(timerID);
+          document.stopwatch.button.value = "Copy to Clipboard";
+          document.stopwatch.display.value = formatTime((timer_now - timer_start)/10);
+        }
+        lap_index++;
+        break;
+    }
+  }
+
+  function updateDisplay(){
+    document.stopwatch.display.value = formatTime((Date.now() - timer_start)/10);
+  }
+
+  function lapFunc(){
+    timer_now = Date.now();
+    document.stopwatch.csv.value =
+      csv_header +
+      lap_index + "," +
+      formatTime((timer_now - timer_lap)/10) + "," +
+      formatTime((timer_now - timer_start)/10) + "\n" +
+      document.stopwatch.csv.value.slice(csv_header.length);
+    timer_lap = timer_now;
+  }
+
+  function formatTime(num){
+    var s = num / 100;
+    var m = Math.floor(s / 60);
+    var h = Math.floor(m / 60);
+    s = (s % 60).toFixed(2);
+    m = m % 60;
+    if(s < 10) s = "0" + s;
+    if(m < 10) m = "0" + m;
+    if(h < 10) h = "0" + h;
+    return h + ":" + m + ":" + s;
+  }
+
+  function copyToClipboard(el){
+    if(is_ios){
+      var oldContentEditable = el.contentEditable;
+      var oldReadOnly = el.readOnly;
+      var range = document.createRange();
+
+      el.contentEditable = true;
+      el.readOnly = false;
+      range.selectNodeContents(el);
+
+      var s = window.getSelection();
+      s.removeAllRanges();
+      s.addRange(range);
+
+      el.setSelectionRange(0, clipboard_buff);
+
+      el.contentEditable = oldContentEditable;
+      el.readOnly = oldReadOnly;
+    }else{
+      textarea = document.getElementsByTagName("TEXTAREA")[0];
+      textarea.select();
+    }
+    document.execCommand("copy");
+    alert("Copied to Clipboard!");
+  }
+ </SCRIPT>
+</HTML>
